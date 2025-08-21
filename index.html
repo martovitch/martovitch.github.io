@@ -19,231 +19,7 @@
             box-sizing: border-box;
             position: relative; /* Для позиционирования уведомления и эффекта огня */
             transition: background-color 0.1s ease-out; /* Плавный переход для фона */
-            overflow: hidden; /* Скрыть любой скролл, особенно во время переходов меню */
-        }
-
-        /* --- Меню (поднимается снизу) --- */
-        .side-menu {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 90vh; /* Консистентная высота для расчетов */
-            /* Изначально меню полностью скрыто снизу */
-            transform: translateY(100%);
-            transition: transform 0.5s ease-out; /* Плавный переход для трансформации */
-            z-index: 1100; /* Выше игрового поля, но ниже оверлея меню */
-            display: flex;
-            flex-direction: column;
-            border-top-left-radius: 20px; /* Закругление верхних углов */
-            border-top-right-radius: 20px; /* Закругление верхних углов */
-            background-color: #ffffff; /* Фон меню */
-            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.25); /* Тень сверху */
-            padding-bottom: 2rem; /* Отступ снизу для контента */
-            box-sizing: border-box; /* Учитываем padding */
-        }
-
-        /* Класс, который добавляется JS, когда меню открыто */
-        html.menu-open .side-menu {
-            transform: translateY(0%); /* Выдвигается, возвращаясь на место */
-        }
-
-        /* --- Содержимое меню --- */
-        .menu-content {
-            flex-grow: 1; /* Позволяет содержимому занимать доступное пространство */
-            padding: 0 1.5rem; /* Горизонтальные отступы */
-            overflow-y: auto; /* Добавляем скролл, если контента много */
-            max-height: 100%; /* Убедимся, что не выходит за пределы родителя */
-            box-sizing: border-box; /* Учитываем padding */
-            /* Стили для полосы прокрутки */
-            scrollbar-width: thin; /* Firefox */
-            scrollbar-color: #888 #f1f1f1; /* Firefox */
-        }
-
-        /* Webkit browsers (Chrome, Safari) */
-        .menu-content::-webkit-scrollbar {
-            width: 8px; /* Ширина полосы прокрутки */
-        }
-
-        .menu-content::-webkit-scrollbar-track {
-            background: #f1f1f1; /* Цвет дорожки прокрутки */
-            border-radius: 10px;
-        }
-
-        .menu-content::-webkit-scrollbar-thumb {
-            background: #888; /* Цвет ползунка прокрутки */
-            border-radius: 10px;
-        }
-
-        .menu-content::-webkit-scrollbar-thumb:hover {
-            background: #555; /* Цвет ползунка прокрутки при наведении */
-        }
-
-        .achievement-display {
-            margin-top: 1rem;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            padding: 0;
-        }
-
-        .achievement-display h3 {
-            font-size: 1rem;
-            font-weight: bold;
-            color: #2d3748;
-            margin-bottom: 0.75rem;
-            text-align: center;
-        }
-
-        /* Стиль для отдельного фрейма достижения */
-        .achievement-item {
-            background-color: #e2e8f0;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .achievement-item .achievement-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .achievement-item .achievement-text {
-            font-size: 0.95rem;
-            color: #4a5568;
-            line-height: 1.4;
-            margin: 0;
-        }
-
-        .achievement-display .no-achievements {
-            text-align: center;
-            color: #718096;
-            font-style: italic;
-            padding: 1rem;
-        }
-
-        /* --- Наложение меню (для затемнения фона) --- */
-        .menu-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: rgba(0, 0, 0, 0.5);
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
-            z-index: 1050; /* Между игровым полем и меню */
-        }
-
-        html.menu-open .menu-overlay {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* --- Оболочка игрового контента (с эффектом параллакса) --- */
-        .game-content-wrapper {
-            transition: transform 0.5s ease-out, opacity 0.5s ease-out, filter 0.5s ease-out, border-radius 0.5s ease-out; /* Добавлен border-radius для эффекта карточки */
-            width: calc(100% - 32px); /* Учитываем padding body */
-            height: calc(100vh - 32px); /* Учитываем padding body */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: absolute; /* Используем absolute для параллакса */
-            top: 16px; /* Отступ сверху */
-            left: 16px; /* Отступ слева */
-            box-sizing: border-box;
-            background-color: #000000; /* Цвет фона игрового поля */
-            border-radius: 0; /* Изначально без закруглений */
-            will-change: transform, opacity, filter, border-radius; /* Оптимизация для анимации */
-            z-index: 100; /* Ниже меню и оверлея */
-        }
-        /* Класс, который добавляется JS, когда меню открыто */
-        html.menu-open .game-content-wrapper {
-            transform: translateY(-5vh) scale(0.9); /* Сдвиг вверх и уменьшение */
-            opacity: 0.7; /* Затемнение */
-            filter: blur(2px); /* Небольшое размытие */
-            border-radius: 20px; /* Закругление углов для эффекта карточки */
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2); /* Тень */
-        }
-
-        /* --- Ручка меню (всегда видна внизу экрана) --- */
-        .menu-handle {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px; /* Ширина ручки */
-            height: 40px; /* Высота ручки */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            z-index: 1200; /* Выше всего */
-            background-color: #ffffff; /* Фон ручки */
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
-            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
-        }
-
-        .menu-handle-arrow {
-            /* Эти стили теперь не используются, так как span пустой */
-            font-size: 1.5rem; 
-            color: #4a5568; 
-            transition: none; 
-        }
-        
-        /* --- Подсказка для свайпа --- */
-        .swipe-up-hint {
-            position: fixed;
-            bottom: 0; /* Базовая позиция для анимации */
-            left: 50%;
-            transform: translateX(-50%) translateY(100%); /* Изначально скрыто (внизу экрана), как personality-motivation */
-            transition: transform 0.5s ease-out, opacity 0.5s ease-out; /* Плавные переходы для появления/скрытия */
-            z-index: 95;
-            color: #4a5568;
-            font-size: 1rem;
-            font-weight: 500;
-            pointer-events: none; /* Не блокирует клики по кнопке */
-            opacity: 0; /* Изначально полностью прозрачно */
-            padding: 8px 16px; /* Внутренние отступы */
-            border-radius: 20px; /* Закругленные углы */
-            background-color: rgba(255, 255, 255, 0.7); /* Полупрозрачный фон */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            text-align: center; /* Центрируем текст */
-            box-sizing: border-box;
-            width: 100%; /* Занимает всю ширину родителя для отступов */
-            max-width: 480px; /* Ограничиваем максимальную ширину для десктопов, как у высказываний */
-            padding-bottom: 80px; /* Отступ текста от нижнего края элемента */
-        }
-
-        /* Класс для отображения и анимации появления подсказки */
-        .swipe-up-hint.show {
-            transform: translateX(-50%) translateY(0%); /* Выезжает в видимую область */
-            opacity: 1; /* Становится полностью видимым */
-        }
-
-        /* Класс для полного скрытия, когда элемент не должен занимать место */
-        .hidden {
-            display: none !important;
-        }
-
-        /* Когда меню открыто, подсказка должна скрываться с анимацией */
-        html.menu-open .swipe-up-hint {
-            transform: translateX(-50%) translateY(100%) !important; /* Принудительно скрываем вниз */
-            opacity: 0 !important; /* Принудительно делаем прозрачным */
-        }
-
-        /* --- Бургер-иконка (больше не используется) --- */
-        .menu-toggle {
-            display: none;
+            overflow: hidden; /* Скрыть любой скролл */
         }
 
         /* --- Стили для круглой кнопки --- */
@@ -378,7 +154,7 @@
             white-space: nowrap;
             opacity: 1;
             animation: bonusFade 5s forwards; /* Анимация, длительность 5 секунд */
-            z-index: 1005; /* Выше всего, кроме меню */
+            z-index: 1005; /* Выше всего */
             pointer-events: none; /* Пропускает клики */
             display: flex; /* Для центрирования текста */
             justify-content: center;
@@ -407,8 +183,8 @@
     <!-- Canvas для фигур -->
     <canvas id="shapesCanvas" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1090; pointer-events: none;"></canvas>
 
-    <!-- Оболочка игрового контента, которая будет сдвигаться -->
-    <div id="gameContentWrapper" class="game-content-wrapper">
+    <!-- Оболочка игрового контента -->
+    <div id="gameContentWrapper">
         <!-- Счет кликов теперь внутри кнопки -->
         <button id="clickButton" class="click-button">
             <span id="score" class="font-extrabold">0 ₽</span>
@@ -427,26 +203,6 @@
             <div id="personalityIcon" class="personality-icon"></div>
             <div id="personalitySpeechBubble" class="speech-bubble"></div>
         </div>
-
-        <!-- Подсказка для свайпа -->
-        <div id="swipeUpHint" class="swipe-up-hint hidden">Свайпни вверх, чтобы посмотреть все достижения</div>
-    </div>
-
-    <!-- Боковое меню (теперь поднимается снизу) -->
-    <div id="sideMenu" class="side-menu">
-        <div class="menu-content">
-            <div id="achievementDisplay" class="achievement-display">
-                <!-- Достижения будут отображаться здесь при открытии меню -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Наложение меню (для затемнения фона) -->
-    <div id="menuOverlay" class="menu-overlay"></div>
-
-    <!-- Ручка меню (всегда видна внизу экрана) -->
-    <div id="menuHandle" class="menu-handle">
-        <span id="menuHandleArrow" class="menu-handle-arrow"></span> <!-- Стрелка убрана -->
     </div>
 
     <script>
@@ -459,15 +215,6 @@
         const personalityMotivation = document.getElementById('personalityMotivation');
         const personalityIcon = document.getElementById('personalityIcon');
         const personalitySpeechBubble = document.getElementById('personalitySpeechBubble');
-
-        // Элементы меню
-        const sideMenu = document.getElementById('sideMenu');
-        const menuHandle = document.getElementById('menuHandle');
-        const menuHandleArrow = document.getElementById('menuHandleArrow'); 
-        const menuOverlay = document.getElementById('menuOverlay');
-        const gameContentWrapper = document.getElementById('gameContentWrapper');
-        const achievementDisplay = document.getElementById('achievementDisplay');
-        const swipeUpHint = document.getElementById('swipeUpHint');
 
         // Canvas для фигур
         const shapesCanvas = document.getElementById('shapesCanvas');
@@ -557,10 +304,6 @@
         const EXP_BASE_FOR_SCORE_BONUS = 1.002;
         const EXP_POWER_DIVISOR_FOR_SCORE_BONUS = 50;
 
-        let startY = 0; 
-        let isSwiping = false; 
-        let currentMenuState = 'closed';
-
         // Добавляем переменную для хранения текущей формы кнопки
         let currentButtonShape = 'circle';
         // Возможные формы кнопки
@@ -570,135 +313,6 @@
         notificationContent.classList.add('notification-content');
         notificationToast.appendChild(notificationContent);
 
-        // --- Функции меню ---
-        function updateAchievementsDisplay() {
-            achievementDisplay.innerHTML = ''; 
-            
-            const earnedAchievements = rewards.filter(reward => achievedRewards.has(reward.threshold));
-
-            const achievementsHeader = document.createElement('h3');
-            achievementsHeader.textContent = 'Ваши дизайнерские доходы:';
-            achievementDisplay.appendChild(achievementsHeader);
-
-            if (earnedAchievements.length === 0) {
-                const noAchievementsText = document.createElement('p');
-                noAchievementsText.classList.add('no-achievements');
-                noAchievementsText.textContent = 'Пока нет значимых доходов. Создавайте и зарабатывайте!';
-                achievementDisplay.appendChild(noAchievementsText);
-            } else {
-                earnedAchievements.forEach(reward => {
-                    const achievementItem = document.createElement('div');
-                    achievementItem.classList.add('achievement-item');
-
-                    const achievementIcon = document.createElement('div');
-                    achievementIcon.classList.add('achievement-icon');
-                    achievementIcon.textContent = '💰';
-
-                    const achievementText = document.createElement('p');
-                    achievementText.classList.add('achievement-text');
-                    achievementText.textContent = reward.message;
-
-                    achievementItem.appendChild(achievementIcon);
-                    achievementItem.appendChild(achievementText);
-                    achievementDisplay.appendChild(achievementItem);
-                });
-            }
-        }
-
-        // --- Функции управления параллаксом и состоянием меню ---
-        function updateMenuParallax(openRatio) {
-            openRatio = Math.min(1, Math.max(0, openRatio));
-
-            const menuTransformY = 100 - openRatio * 100;
-            sideMenu.style.transform = `translateY(${menuTransformY}%)`;
-
-            gameContentWrapper.style.transform = `translateY(${-5 * openRatio}vh) scale(${1 - 0.1 * openRatio})`;
-            gameContentWrapper.style.opacity = `${1 - 0.3 * openRatio}`;
-            gameContentWrapper.style.filter = `blur(${2 * openRatio}px)`;
-            gameContentWrapper.style.borderRadius = `${20 * openRatio}px`;
-            gameContentWrapper.style.boxShadow = `0 ${5 * openRatio}px ${20 * openRatio}px rgba(0, 0, 0, ${0.2 * openRatio})`;
-        }
-
-        function updateSwipeUpHintState() {
-            const shouldDisplay = achievedRewards.size >= 2 && 
-                                  currentMenuState === 'closed' && 
-                                  !personalityMotivation.classList.contains('show');
-
-            if (shouldDisplay) {
-                if (swipeUpHint.classList.contains('hidden')) {
-                    swipeUpHint.classList.remove('hidden'); 
-                    setTimeout(() => {
-                        swipeUpHint.classList.add('show'); 
-                    }, 50); 
-                } else if (!swipeUpHint.classList.contains('show')) {
-                    swipeUpHint.classList.add('show');
-                }
-            } else {
-                if (swipeUpHint.classList.contains('show')) {
-                    swipeUpHint.classList.remove('show');
-                    setTimeout(() => {
-                        if (!swipeUpHint.classList.contains('show')) {
-                             swipeUpHint.classList.add('hidden');
-                        }
-                    }, 500); 
-                } else if (!swipeUpHint.classList.contains('hidden')) {
-                    swipeUpHint.classList.add('hidden');
-                }
-            }
-        }
-
-        const handleTouchStart = (e) => {
-            if (currentMenuState === 'opening' || currentMenuState === 'closing') return;
-            startY = e.touches[0].clientY;
-            isSwiping = true;
-            sideMenu.style.transition = 'none';
-            gameContentWrapper.style.transition = 'none';
-        };
-
-        const handleTouchMove = (e) => {
-            if (!isSwiping) return;
-            e.preventDefault(); 
-        };
-
-        const handleTouchEnd = (e) => {
-            if (!isSwiping) return;
-            isSwiping = false;
-
-            const totalVerticalMovement = startY - e.changedTouches[0].clientY; 
-            const swipeThreshold = 5; 
-            const activeAreaThreshold = window.innerHeight * 0.70; 
-
-            if ((currentMenuState === 'closed' || currentMenuState === 'closing') && totalVerticalMovement > swipeThreshold) {
-                if (startY > activeAreaThreshold) {
-                    openMenu(); 
-                }
-            } else if ((currentMenuState === 'open' || currentMenuState === 'opening') && totalVerticalMovement < -swipeThreshold) {
-                closeMenu(); 
-            }
-        };
-
-        gameContentWrapper.addEventListener('touchstart', handleTouchStart);
-        gameContentWrapper.addEventListener('touchmove', handleTouchMove);
-        gameContentWrapper.addEventListener('touchend', handleTouchEnd);
-
-        menuHandle.addEventListener('touchstart', handleTouchStart);
-        menuHandle.addEventListener('touchmove', handleTouchMove);
-        menuHandle.addEventListener('touchend', handleTouchEnd);
-
-        sideMenu.addEventListener('touchstart', handleTouchStart);
-        sideMenu.addEventListener('touchmove', handleTouchMove);
-        sideMenu.addEventListener('touchend', handleTouchEnd);
-
-        menuHandle.addEventListener('click', () => {
-            if (currentMenuState === 'open') {
-                closeMenu();
-            } else {
-                openMenu();
-            }
-        });
-
-        menuOverlay.addEventListener('click', closeMenu);
-        
         // --- Основные функции игры ---
         function updateScoreDisplay() {
             scoreDisplay.textContent = `${score} ₽`;
@@ -718,8 +332,6 @@
         }
 
         function showPersonality() {
-            updateSwipeUpHintState(); 
-
             if (Date.now() - lastPersonalityShowTime < PERSONALITY_MIN_DELAY) {
                 return;
             }
@@ -734,7 +346,6 @@
 
             setTimeout(() => {
                 personalityMotivation.classList.remove('show');
-                updateSwipeUpHintState(); 
             }, 5000); 
         }
 
@@ -910,7 +521,6 @@
                     achievedRewards.add(reward.threshold);
                     triggerShapes(); // Запускаем фигуры при получении достижения
                     changeButtonShape(); // Меняем форму кнопки при получении достижения
-                    updateSwipeUpHintState(); 
                 }
             });
 
@@ -919,54 +529,12 @@
             }
         });
 
-        // Открытие меню
-        function openMenu() {
-            if (currentMenuState === 'open' || currentMenuState === 'opening') return;
-            currentMenuState = 'opening';
-            html.classList.add('menu-open');
-            
-            updateSwipeUpHintState(); 
-            
-            sideMenu.style.transition = 'transform 0.5s ease-out';
-            gameContentWrapper.style.transition = 'transform 0.5s ease-out, opacity 0.5s ease-out, filter 0.5s ease-out, border-radius 0.5s ease-out, box-shadow 0.5s ease-out';
-            
-            updateMenuParallax(1); 
-            updateAchievementsDisplay();
-
-            setTimeout(() => {
-                currentMenuState = 'open';
-                sideMenu.style.transition = 'none';
-                gameContentWrapper.style.transition = 'none';
-            }, 500);
-        }
-
-        // Закрытие меню
-        function closeMenu() {
-            if (currentMenuState === 'closed' || currentMenuState === 'closing') return;
-            currentMenuState = 'closing';
-            html.classList.remove('menu-open');
-            
-            sideMenu.style.transition = 'transform 0.5s ease-out';
-            gameContentWrapper.style.transition = 'transform 0.5s ease-out, opacity 0.5s ease-out, filter 0.5s ease-out, border-radius 0.5s ease-out, box-shadow 0.5s ease-out';
-
-            updateMenuParallax(0); 
-            
-            setTimeout(() => {
-                currentMenuState = 'closed';
-                sideMenu.style.transition = 'none';
-                gameContentWrapper.style.transition = 'none';
-                updateSwipeUpHintState(); 
-            }, 500);
-        }
-
         // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
             resizeShapesCanvas(); // Устанавливаем начальный размер холста фигур
             updateScoreDisplay();
             animateIntensity();
             animateShapes(); // Запускаем анимацию фигур
-            updateMenuParallax(0); 
-            updateSwipeUpHintState(); 
             // Устанавливаем начальную форму кнопки
             clickButton.style.borderRadius = '9999px'; 
             clickButton.style.clipPath = 'none';
