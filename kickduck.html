@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>kickduck</title>
+    <style>
+        /* Общие стили для тела страницы */
+        body {
+            background-color: white;
+            margin: 0;
+            overflow: hidden;
+            cursor: none;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Стили для игрового поля */
+        #gameCanvas {
+            background-color: white;
+            border: none;
+            cursor: none;
+        }
+
+        /* Стили для кастомного курсора (смайлика ноги) */
+        #customCursor {
+            position: absolute;
+            width: auto;
+            height: auto;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            font-size: 2.5em;
+            line-height: 0.9;
+            white-space: pre;
+            text-align: left;
+        }
+
+        /* Стили для счетчиков */
+        #scoreContainer {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+        
+        #scoreDisplay, #bestScoreDisplay {
+            font-family: monospace;
+            font-size: 1.5em;
+            color: black;
+            user-select: none;
+            margin: 5px 0;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div id="customCursor">
+        <span>🦵🏻</span>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <div id="scoreContainer">
+        <div id="scoreDisplay">Счет: 0</div>
+        <div id="bestScoreDisplay">Лучший счет: 0</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const customCursor = document.getElementById('customCursor');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const bestScoreDisplay = document.getElementById('bestScoreDisplay');
+
+        // Переменные для игровых объектов
+        let particle = null; // Фигура
+        let computer = null; // Компьютер
+
+        // Переменные для таймера компьютера
+        let nextComputerSpawnTime = 0;
+        const minSpawnTime = 2000; // 2 секунды
+        const maxSpawnTime = 4000; // 4 секунды
+
+        // Объект для отслеживания координат мыши
+        let mouse = {
+            x: undefined,
+            y: undefined
+        };
+        let score = 0;
+        let bestScore = 0;
+
+        // Константы для размеров и буферов
+        const particleSize = 50;
+        const hitBuffer = 75; // Увеличенная область для клика по фигуре
+        const computerHitBuffer = 20; // Буфер для столкновения с компьютером
+
+        // Класс для фигуры
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = particleSize;
+                this.velocity = { x: 0, y: 0 };
+                this.gravity = 0.02;
+                this.friction = 0.8;
+                this.color = 'red';
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.font = `${this.size}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('Ɑ͞ ̶͞ ̶͞ ̶͞ لں͞', this.x, this.y);
+            }
+
+            update() {
+                this.velocity.y += this.gravity;
+                this.y += this.velocity.y;
+                this.x += this.velocity.x;
+
+                // Отскок от верхней границы
+                if (this.y - this.size / 2 < 0) {
+                    this.velocity.y *= -this.friction;
+                    this.y = this.size / 2;
+                }
+
+                // Отскок от левой и правой границ
+                if (this.x - this.size / 2 < 0) {
+                    this.velocity.x = Math.abs(this.velocity.x) * this.friction;
+                    this.x = this.size / 2; 
+                } else if (this.x + this.size / 2 > canvas.width) {
+                    this.velocity.x = -Math.abs(this.velocity.x) * this.friction;
+                    this.x = canvas.width - this.size / 2;
+                }
+
+                // Удаление фигуры, если она падает за пределы экрана
+                if (this.y > canvas.height + this.size) {
+                    particle = null;
+                    score = 0; // Сброс счета
+                    updateScoreDisplay(); 
+                } else {
+                    this.draw();
+                }
+            }
+        }
+
+        // Класс для компьютера
+        class Computer {
+            constructor() {
+                this.size = 50;
+                this.x = Math.random() * (canvas.width - this.size) + this.size / 2;
+                this.y = Math.random() * (canvas.height - this.size) + this.size / 2;
+            }
+
+            draw() {
+                ctx.font = `${this.size}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('💻', this.x, this.y);
+            }
+        }
+
+        // Функция для обновления отображения счета
+        function updateScoreDisplay() {
+            scoreDisplay.textContent = `Счет: ${score}`;
+        }
+        
+        // Функция для обновления отображения лучшего счета
+        function updateBestScoreDisplay() {
+            bestScoreDisplay.textContent = `Лучший счет: ${bestScore}`;
+        }
+
+        // Функция инициализации игры
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particle = null;
+            computer = null;
+            score = 0;
+            
+            // Загрузка лучшего счета из локального хранилища
+            const savedBestScore = localStorage.getItem('bestScore');
+            if (savedBestScore !== null) {
+                bestScore = parseInt(savedBestScore, 10);
+            }
+            
+            updateScoreDisplay();
+            updateBestScoreDisplay();
+            nextComputerSpawnTime = Date.now() + Math.random() * (maxSpawnTime - minSpawnTime) + minSpawnTime;
+        }
+
+        // Главный игровой цикл
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Обновление и отрисовка компьютера
+            if (Date.now() >= nextComputerSpawnTime) {
+                computer = new Computer();
+                nextComputerSpawnTime = Date.now() + Math.random() * (maxSpawnTime - minSpawnTime) + minSpawnTime;
+            }
+            if (computer) {
+                computer.draw();
+                // Проверка на столкновение мыши с компьютером
+                const distance = Math.hypot(mouse.x - computer.x, mouse.y - computer.y);
+                if (distance < computer.size / 2 + computerHitBuffer) {
+                    init();
+                }
+            }
+
+            // Обновление и отрисовка фигуры
+            if (particle) {
+                particle.update();
+            }
+        }
+
+        // Обработчик изменения размера окна
+        window.addEventListener('resize', () => {
+            init();
+        });
+
+        // Обработчик движения мыши
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = event.clientX;
+            mouse.y = event.clientY;
+            customCursor.style.left = `${mouse.x}px`;
+            customCursor.style.top = `${mouse.y}px`;
+        });
+
+        // Обработчик клика
+        canvas.addEventListener('click', (event) => {
+            if (!particle) {
+                // Создание новой фигуры при первом клике
+                const x = Math.random() * (canvas.width - particleSize) + particleSize / 2;
+                const y = Math.random() * (canvas.height - particleSize) + particleSize / 2;
+                particle = new Particle(x, y);
+            } else {
+                // Проверка на клик по существующей фигуре
+                const clickX = event.clientX;
+                const clickY = event.clientY;
+
+                if (
+                    clickX > particle.x - particle.size / 2 - hitBuffer &&
+                    clickX < particle.x + particle.size / 2 + hitBuffer &&
+                    clickY > particle.y - particle.size / 2 - hitBuffer &&
+                    clickY < particle.y + particle.size / 2 + hitBuffer
+                ) {
+                    const dx = clickX - particle.x;
+                    const bounceFactor = 0.15;
+                    particle.velocity.y = -5; // Вертикальный отскок
+                    particle.velocity.x = dx * bounceFactor; // Горизонтальный отскок
+                    score++;
+                    updateScoreDisplay();
+                    
+                    // Обновление лучшего счета
+                    if (score > bestScore) {
+                        bestScore = score;
+                        localStorage.setItem('bestScore', bestScore);
+                        updateBestScoreDisplay();
+                    }
+                }
+            }
+        });
+
+        // Запуск игры после загрузки страницы
+        window.onload = function() {
+            init();
+            animate();
+        };
+    </script>
+</body>
+</html>
